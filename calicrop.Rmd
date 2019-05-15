@@ -195,3 +195,61 @@ almond_plot <- ggplot(almond) +
 almond_plot
 
 ```
+
+```{r}
+
+#orange
+
+o_c_45 <- rep(0, 93)
+o_c_85 <- rep(0, 93)
+o_e_45 <- rep(0, 93)
+o_e_85 <- rep(0, 93)
+o_h_45 <- rep(0, 93)
+o_h_85 <- rep(0, 93)
+
+for (x in crop$year) {
+
+  tn12_c_45 = as.numeric(c_45 %>% filter(year == (x-1), month == 12) %>% select(min_temp)) - 273.15
+  tn12_c_85 = as.numeric(c_85 %>% filter(year == (x-1), month == 12) %>% select(min_temp)) - 273.15
+  tn12_e_45 = as.numeric(e_45 %>% filter(year == (x-1), month == 12) %>% select(min_temp)) - 273.15
+  tn12_e_85 = as.numeric(e_85 %>% filter(year == (x-1), month == 12) %>% select(min_temp)) - 273.15
+  tn12_h_45 = as.numeric(h_45 %>% filter(year == (x-1), month == 12) %>% select(min_temp)) - 273.15
+  tn12_h_85 = as.numeric(h_85 %>% filter(year == (x-1), month == 12) %>% select(min_temp)) - 273.15
+
+  p5_c_45 = as.numeric(c_45 %>% filter(year == (x), month == 5) %>% select(precip))
+  p5_c_85 = as.numeric(c_85 %>% filter(year == (x), month == 5) %>% select(precip))
+  p5_e_45 = as.numeric(e_45 %>% filter(year == (x), month == 5) %>% select(precip))
+  p5_e_85 = as.numeric(e_85 %>% filter(year == (x), month == 5) %>% select(precip))
+  p5_h_45 = as.numeric(h_45 %>% filter(year == (x), month == 5) %>% select(precip))
+  p5_h_85 = as.numeric(h_85 %>% filter(year == (x), month == 5) %>% select(precip))
+  
+
+  
+  o_c_45[x-2006] = 1.08 * tn12_c_45 - 0.2 * tn12_c_45^2 + 4.99 * p5_c_45 - 1.97 * p5_c_45^2 - 2.47
+  o_c_85[x-2006] = 1.08 * tn12_c_85 - 0.2 * tn12_c_85^2 + 4.99 * p5_c_85 - 1.97 * p5_c_45^2 - 2.47
+  o_e_45[x-2006] = 1.08 * tn12_e_45 - 0.2 * tn12_e_45^2 + 4.99 * p5_e_45 - 1.97 * p5_c_45^2 - 2.47
+  o_e_85[x-2006] = 1.08 * tn12_e_85 - 0.2 * tn12_e_85^2 + 4.99 * p5_e_85 - 1.97 * p5_c_45^2 - 2.47
+  o_h_45[x-2006] = 1.08 * tn12_h_45 - 0.2 * tn12_h_45^2 + 4.99 * p5_h_45 - 1.97 * p5_c_45^2 - 2.47
+  o_h_85[x-2006] = 1.08 * tn12_h_85 - 0.2 * tn12_h_85^2 + 4.99 * p5_h_85 - 1.97 * p5_c_45^2 - 2.47
+  
+}
+
+```
+
+```{r}
+
+orange <- data.frame("year" = crop$year, "c_45" = o_c_45, "c_85" = o_c_85, "e_45" = o_e_45, "e_85" = o_e_85, "h_45" = o_h_45, "h_85" = o_h_85)
+
+orange_plot <- ggplot(orange) +
+  geom_line(aes(x = year, y = c_45, color = "CCSM4 (rcp4.5)")) +
+  geom_line(aes(x = year, y = c_85, color = "CCSM4 (rcp8.5)")) +
+  geom_line(aes(x = year, y = e_45, color = "CanESM2 (rcp4.5)")) +
+  geom_line(aes(x = year, y = e_85, color = "CanESM2 (rcp8.5)")) +
+  geom_line(aes(x = year, y = h_45, color = "HadGEM2-CC365 (rcp4.5)")) +
+  geom_line(aes(x = year, y = h_85, color = "HadGEM2-CC365 (rcp8.5)"))+
+  scale_colour_manual(values= c("skyblue", "sienna1", "turquoise3", "violetred", "springgreen3", "magenta")) +
+  theme_pubr()
+  
+orange_plot
+
+```
