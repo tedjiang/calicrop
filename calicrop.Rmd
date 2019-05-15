@@ -1,0 +1,197 @@
+---
+title: "calicrop"
+author: "Yingfei Jiang"
+date: "5/15/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(lubridate)
+library(ggpubr)
+
+e_45 <- read_csv("CanESM2_45.csv")
+e_85 <- read_csv("CanESM2_85.csv")
+c_45 <- read_csv("CCSM4_45.csv")
+c_85 <- read_csv("CCSM4_85.csv")
+h_45 <- read_csv("HadGEM2-CC365_45.csv")
+h_85 <- read_csv("HadGEM2-CC365_85.csv")
+
+```
+
+```{r}
+
+e_45 <- e_45 %>% 
+  mutate(parsedate = mdy(date)) %>% 
+  mutate(month = month(parsedate),
+         year = year(parsedate))
+
+e_85 <- e_85 %>% 
+  mutate(parsedate = mdy(date)) %>% 
+  mutate(month = month(parsedate),
+         year = year(parsedate))
+
+c_45 <- c_45 %>% 
+  mutate(parsedate = mdy(Date)) %>% 
+  mutate(month = month(parsedate),
+         year = year(parsedate))
+
+c_85 <- c_85 %>% 
+  mutate(parsedate = mdy(Date)) %>% 
+  mutate(month = month(parsedate),
+         year = case_when(
+           year(parsedate) <= 2000 ~ year(parsedate) + 100,
+           year(parsedate) > 2000 ~ year(parsedate)
+           ))
+
+h_45 <- h_45 %>% 
+  mutate(parsedate = mdy(date)) %>% 
+  mutate(month = month(parsedate),
+         year = year(parsedate))
+
+h_85 <- h_85 %>% 
+  mutate(parsedate = mdy(date)) %>% 
+  mutate(month = month(parsedate),
+         year = year(parsedate))
+
+```
+
+
+```{r}
+
+#Create a dataframe
+
+crop <- data.frame("year" = 2007:2099)
+
+
+
+```
+
+```{r}
+
+#table grape
+
+g_c_45 <- rep(0, 93)
+g_c_85 <- rep(0, 93)
+g_e_45 <- rep(0, 93)
+g_e_85 <- rep(0, 93)
+g_h_45 <- rep(0, 93)
+g_h_85 <- rep(0, 93)
+
+for (x in crop$year) {
+  tn7_c_45 = as.numeric(c_45 %>% filter(year == (x), month == 7) %>% select(min_temp)) - 273.15
+  tn7_c_85 = as.numeric(c_85 %>% filter(year == (x), month == 7) %>% select(min_temp)) - 273.15
+  tn7_e_45 = as.numeric(e_45 %>% filter(year == (x), month == 7) %>% select(min_temp)) - 273.15
+  tn7_e_85 = as.numeric(e_85 %>% filter(year == (x), month == 7) %>% select(min_temp)) - 273.15
+  tn7_h_45 = as.numeric(h_45 %>% filter(year == (x), month == 7) %>% select(min_temp)) - 273.15
+  tn7_h_85 = as.numeric(h_85 %>% filter(year == (x), month == 7) %>% select(min_temp)) - 273.15
+  tn4_c_45 = as.numeric(c_45 %>% filter(year == (x), month == 4) %>% select(min_temp)) - 273.15
+  tn4_c_85 = as.numeric(c_85 %>% filter(year == (x), month == 4) %>% select(min_temp)) - 273.15
+  tn4_e_45 = as.numeric(e_45 %>% filter(year == (x), month == 4) %>% select(min_temp)) - 273.15
+  tn4_e_85 = as.numeric(e_85 %>% filter(year == (x), month == 4) %>% select(min_temp)) - 273.15
+  tn4_h_45 = as.numeric(h_45 %>% filter(year == (x), month == 4) %>% select(min_temp)) - 273.15
+  tn4_h_85 = as.numeric(h_85 %>% filter(year == (x), month == 4) %>% select(min_temp)) - 273.15
+  p10_c_45 = as.numeric(c_45 %>% filter(year == (x-1), month == 10) %>% select(precip))
+  p10_c_85 = as.numeric(c_85 %>% filter(year == (x-1), month == 10) %>% select(precip))
+  p10_e_45 = as.numeric(e_45 %>% filter(year == (x-1), month == 10) %>% select(precip))
+  p10_e_85 = as.numeric(e_85 %>% filter(year == (x-1), month == 10) %>% select(precip))
+  p10_h_45 = as.numeric(h_45 %>% filter(year == (x-1), month == 10) %>% select(precip))
+  p10_h_85 = as.numeric(h_85 %>% filter(year == (x-1), month == 10) %>% select(precip))
+  p1_c_45 = as.numeric(c_45 %>% filter(year == (x), month == 1) %>% select(precip))
+  p1_c_85 = as.numeric(c_85 %>% filter(year == (x), month == 1) %>% select(precip))
+  p1_e_45 = as.numeric(e_45 %>% filter(year == (x), month == 1) %>% select(precip))
+  p1_e_85 = as.numeric(e_85 %>% filter(year == (x), month == 1) %>% select(precip))
+  p1_h_45 = as.numeric(h_45 %>% filter(year == (x), month == 1) %>% select(precip))
+  p1_h_85 = as.numeric(h_85 %>% filter(year == (x), month == 1) %>% select(precip))
+  
+
+  
+  g_c_45[x-2006] = 6.93 * tn7_c_45 - 0.19 * tn7_c_45^2 + 2.61 * tn4_c_45 - 0.15 * tn4_c_45^2 + 0.035 * p1_c_45 + 0.024 * p1_c_45^2 + 1.71 * p10_c_45 - 0.673 * p10_c_45^2 - 73.89
+  g_c_85[x-2006] = 6.93 * tn7_c_85 - 0.19 * tn7_c_85^2 + 2.61 * tn4_c_85 - 0.15 * tn4_c_85^2 + 0.035 * p1_c_85 + 0.024 * p1_c_85^2 + 1.71 * p10_c_85 - 0.673 * p10_c_85^2 - 73.89
+  g_e_45[x-2006] = 6.93 * tn7_e_45 - 0.19 * tn7_e_45^2 + 2.61 * tn4_e_45 - 0.15 * tn4_e_45^2 + 0.035 * p1_e_45 + 0.024 * p1_e_45^2 + 1.71 * p10_e_45 - 0.673 * p10_e_45^2 - 73.89
+  g_e_85[x-2006] = 6.93 * tn7_e_85 - 0.19 * tn7_e_85^2 + 2.61 * tn4_e_85 - 0.15 * tn4_e_85^2 + 0.035 * p1_e_85 + 0.024 * p1_e_85^2 + 1.71 * p10_e_85 - 0.673 * p10_e_85^2 - 73.89
+  g_h_45[x-2006] = 6.93 * tn7_h_45 - 0.19 * tn7_h_45^2 + 2.61 * tn4_h_45 - 0.15 * tn4_h_45^2 + 0.035 * p1_h_45 + 0.024 * p1_h_45^2 + 1.71 * p10_h_45 - 0.673 * p10_h_45^2 - 73.89
+  g_h_85[x-2006] = 6.93 * tn7_h_85 - 0.19 * tn7_h_85^2 + 2.61 * tn4_h_85 - 0.15 * tn4_h_85^2 + 0.035 * p1_h_85 + 0.024 * p1_h_85^2 + 1.71 * p10_h_85 - 0.673 * p10_h_85^2 - 73.89
+  
+}
+
+```
+
+```{r}
+
+table_grape <- data.frame("year" = crop$year, "c_45" = g_c_45, "c_85" = g_c_85, "e_45" = g_e_45, "e_85" = g_e_85, "h_45" = g_h_45, "h_85" = g_h_85)
+
+table_grape_plot <- ggplot(table_grape) +
+  geom_line(aes(x = year, y = c_45, color = "CCSM4 (rcp4.5)")) +
+  geom_line(aes(x = year, y = c_85, color = "CCSM4 (rcp8.5)")) +
+  geom_line(aes(x = year, y = e_45, color = "CanESM2 (rcp4.5)")) +
+  geom_line(aes(x = year, y = e_85, color = "CanESM2 (rcp8.5)")) +
+  geom_line(aes(x = year, y = h_45, color = "HadGEM2-CC365 (rcp4.5)")) +
+  geom_line(aes(x = year, y = h_85, color = "HadGEM2-CC365 (rcp8.5)"))+
+  scale_colour_manual(values= c("skyblue", "sienna1", "turquoise3", "violetred", "springgreen3", "magenta")) +
+  theme_pubr()
+  
+table_grape_plot
+
+```
+
+
+```{r}
+
+#almond
+
+a_c_45 <- rep(0, 93)
+a_c_85 <- rep(0, 93)
+a_e_45 <- rep(0, 93)
+a_e_85 <- rep(0, 93)
+a_h_45 <- rep(0, 93)
+a_h_85 <- rep(0, 93)
+
+for (x in crop$year) {
+
+  tn2_c_45 = as.numeric(c_45 %>% filter(year == (x), month == 2) %>% select(min_temp)) - 273.15
+  tn2_c_85 = as.numeric(c_85 %>% filter(year == (x), month == 2) %>% select(min_temp)) - 273.15
+  tn2_e_45 = as.numeric(e_45 %>% filter(year == (x), month == 2) %>% select(min_temp)) - 273.15
+  tn2_e_85 = as.numeric(e_85 %>% filter(year == (x), month == 2) %>% select(min_temp)) - 273.15
+  tn2_h_45 = as.numeric(h_45 %>% filter(year == (x), month == 2) %>% select(min_temp)) - 273.15
+  tn2_h_85 = as.numeric(h_85 %>% filter(year == (x), month == 2) %>% select(min_temp)) - 273.15
+
+  p1_c_45 = as.numeric(c_45 %>% filter(year == (x), month == 1) %>% select(precip))
+  p1_c_85 = as.numeric(c_85 %>% filter(year == (x), month == 1) %>% select(precip))
+  p1_e_45 = as.numeric(e_45 %>% filter(year == (x), month == 1) %>% select(precip))
+  p1_e_85 = as.numeric(e_85 %>% filter(year == (x), month == 1) %>% select(precip))
+  p1_h_45 = as.numeric(h_45 %>% filter(year == (x), month == 1) %>% select(precip))
+  p1_h_85 = as.numeric(h_85 %>% filter(year == (x), month == 1) %>% select(precip))
+  
+
+  
+  a_c_45[x-2006] = -0.015 * tn2_c_45 - 0.0046 * tn2_c_45^2 - 0.07 * p1_c_45 + 0.0043 * p1_c_45^2 + 0.28
+  a_c_85[x-2006] = -0.015 * tn2_c_85 - 0.0046 * tn2_c_85^2 - 0.07 * p1_c_85 + 0.0043 * p1_c_85^2 + 0.28
+  a_e_45[x-2006] = -0.015 * tn2_e_45 - 0.0046 * tn2_e_45^2 - 0.07 * p1_e_45 + 0.0043 * p1_e_45^2 + 0.28
+  a_e_85[x-2006] = -0.015 * tn2_e_85 - 0.0046 * tn2_e_85^2 - 0.07 * p1_e_85 + 0.0043 * p1_e_85^2 + 0.28
+  a_h_45[x-2006] = -0.015 * tn2_h_45 - 0.0046 * tn2_h_45^2 - 0.07 * p1_h_45 + 0.0043 * p1_h_45^2 + 0.28
+  a_h_85[x-2006] = -0.015 * tn2_h_85 - 0.0046 * tn2_h_85^2 - 0.07 * p1_h_85 + 0.0043 * p1_h_85^2 + 0.28
+  
+}
+
+```
+
+```{r}
+
+almond <- data.frame("year" = crop$year, "c_45" = a_c_45, "c_85" = a_c_85, "e_45" = a_e_45, "e_85" = a_e_85, "h_45" = a_h_45, "h_85" = a_h_85)
+
+almond_plot <- ggplot(almond) +
+  geom_line(aes(x = year, y = c_45, color = "CCSM4 (rcp4.5)")) +
+  geom_line(aes(x = year, y = c_85, color = "CCSM4 (rcp8.5)")) +
+  geom_line(aes(x = year, y = e_45, color = "CanESM2 (rcp4.5)")) +
+  geom_line(aes(x = year, y = e_85, color = "CanESM2 (rcp8.5)")) +
+  geom_line(aes(x = year, y = h_45, color = "HadGEM2-CC365 (rcp4.5)")) +
+  geom_line(aes(x = year, y = h_85, color = "HadGEM2-CC365 (rcp8.5)"))+
+  scale_colour_manual(values= c("skyblue", "sienna1", "turquoise3", "violetred", "springgreen3", "magenta")) +
+  theme_pubr()
+  
+almond_plot
+
+```
