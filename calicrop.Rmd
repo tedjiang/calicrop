@@ -191,7 +191,7 @@ almond_plot <- ggplot(almond) +
   geom_line(aes(x = year, y = e_85, color = "CanESM2 (rcp8.5)")) +
   geom_line(aes(x = year, y = h_45, color = "HadGEM2-CC365 (rcp4.5)")) +
   geom_line(aes(x = year, y = h_85, color = "HadGEM2-CC365 (rcp8.5)"))+
-  scale_colour_manual(values= c("skyblue", "sienna1", "turquoise3", "violetred", "springgreen3", "magenta")) +
+  scale_colour_manual("Model", values= c("skyblue", "sienna1", "turquoise3", "violetred", "springgreen3", "magenta")) +
   theme_pubr()+
   labs(x = "Year", y = "Yield Anomaly (tonne/acre)", title = "Almond Yield Anomaly Projection")+
   scale_x_continuous(breaks = seq(2000, 3000, by = 20))
@@ -258,7 +258,7 @@ wgrape_plot <- ggplot(wgrape) +
   geom_line(aes(x = year, y = e_85, color = "CanESM2 (rcp8.5)")) +
   geom_line(aes(x = year, y = h_45, color = "HadGEM2-CC365 (rcp4.5)")) +
   geom_line(aes(x = year, y = h_85, color = "HadGEM2-CC365 (rcp8.5)"))+
-  scale_colour_manual(values= c("skyblue", "sienna1", "turquoise3", "violetred", "springgreen3", "magenta")) +
+  scale_colour_manual("Model", values= c("skyblue", "sienna1", "turquoise3", "violetred", "springgreen3", "magenta")) +
   theme_pubr()+
   labs(x = "Year", y = "Yield Anomaly (tonne/acre)", title = "Wine Grape Yield Anomaly Projection")+
   scale_x_continuous(breaks = seq(2000, 3000, by = 20))
@@ -318,7 +318,7 @@ orange_plot <- ggplot(orange) +
   geom_line(aes(x = year, y = e_85, color = "CanESM2 (rcp8.5)")) +
   geom_line(aes(x = year, y = h_45, color = "HadGEM2-CC365 (rcp4.5)")) +
   geom_line(aes(x = year, y = h_85, color = "HadGEM2-CC365 (rcp8.5)"))+
-  scale_colour_manual(values= c("skyblue", "sienna1", "turquoise3", "violetred", "springgreen3", "magenta")) +
+  scale_colour_manual("Model", values= c("skyblue", "sienna1", "turquoise3", "violetred", "springgreen3", "magenta")) +
   theme_pubr()+
   labs(x = "Year", y = "Yield Anomaly (tonne/acre)", title = "Orange Yield Anomaly Projection")+
   scale_x_continuous(breaks = seq(2000, 3000, by = 20))
@@ -379,7 +379,7 @@ walnuts_plot <- ggplot(walnuts) +
   geom_line(aes(x = year, y = e_85, color = "CanESM2 (rcp8.5)")) +
   geom_line(aes(x = year, y = h_45, color = "HadGEM2-CC365 (rcp4.5)")) +
   geom_line(aes(x = year, y = h_85, color = "HadGEM2-CC365 (rcp8.5)"))+
-  scale_colour_manual(values= c("skyblue", "sienna1", "turquoise3", "violetred", "springgreen3", "magenta")) +
+  scale_colour_manual("Model", values= c("skyblue", "sienna1", "turquoise3", "violetred", "springgreen3", "magenta")) +
   theme_pubr()+
   labs(x = "Year", y = "Yield Anomaly (tonne/acre)", title = "Walnut Yield Anomaly Projection")+
   scale_x_continuous(breaks = seq(2000, 3000, by = 20))
@@ -448,7 +448,7 @@ avocado_plot <- ggplot(avocado) +
   geom_line(aes(x = year, y = e_85, color = "CanESM2 (rcp8.5)")) +
   geom_line(aes(x = year, y = h_45, color = "HadGEM2-CC365 (rcp4.5)")) +
   geom_line(aes(x = year, y = h_85, color = "HadGEM2-CC365 (rcp8.5)"))+
-  scale_colour_manual(values= c("skyblue", "sienna1", "turquoise3", "violetred", "springgreen3", "magenta")) +
+  scale_colour_manual("Model", values= c("skyblue", "sienna1", "turquoise3", "violetred", "springgreen3", "magenta")) +
   theme_pubr()+
   labs(x = "Year", y = "Yield Anomaly (tonne/acre)", title = "Avocado Yield Anomaly Projection")+
   scale_x_continuous(breaks = seq(2000, 3000, by = 20))
@@ -456,3 +456,44 @@ avocado_plot <- ggplot(avocado) +
 avocado_plot
 
 ```
+
+```{r}
+
+almond <- almond %>% 
+  mutate(crop = "almond")
+
+avocado <- avocado %>% 
+  mutate(crop = "avocado")
+
+orange <- orange %>% 
+  mutate(crop = "orange")
+
+walnuts <- walnuts %>% 
+  mutate(crop = "walnut")
+
+tgrape <- table_grape %>% 
+  mutate(crop = "table grape")
+
+wgrape <- wgrape %>% 
+  mutate(crop = "wine grape")
+
+```
+
+```{r}
+grand_df <- rbind(almond, avocado, orange, walnuts, tgrape, wgrape)
+
+grand_df <- grand_df %>% 
+  group_by(crop)
+
+memo_plot <- ggplot(grand_df) +
+  geom_line(aes(x = year, y = c_45, color = "CCSM4 (rcp4.5)")) +
+  geom_line(aes(x = year, y = c_85, color = "CCSM4 (rcp8.5)")) +
+  facet_wrap(~crop, scale = "free")+
+  theme_pubr()+
+  labs(x = "Year", y = "Yield Anomaly (tonne/acre)", title = "Yield Anomaly Projection")+
+  scale_colour_manual("Model", values= c("blue", "red"))+
+  theme(axis.text.x=element_text(size=rel(0.75)), axis.text.y=element_text(size=rel(0.75)))
+
+memo_plot
+```
+
